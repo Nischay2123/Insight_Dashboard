@@ -3,7 +3,7 @@ import { baseApi } from "./baseApi";
 export const deploymentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDeploymentIds: builder.query({
-      query: () => "item_deployement_data",
+      query: () => "deployment/item_deployement_data",
     }),
   }),
 });
