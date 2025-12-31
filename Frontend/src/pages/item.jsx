@@ -4,12 +4,8 @@ import SiteHeader from "@/components/site-header/site-header";
 import { SidebarInset } from "@/components/ui/sidebar";
 import DataCard from "@/components/data-card/data-card";
 import { useSelector } from "react-redux";
-import {
-  useLazyGetChartItemsDataQuery,
-  useLazyGetItemsDataQuery,
-  useLazyGetCategoriesDataQuery,
-  useLazyGetChartCategoriesDataQuery
-} from "@/redux/api/menu";
+import { useLazyGetChartItemsDataQuery, useLazyGetItemsDataQuery } from "@/redux/api/itemApi";
+import { useLazyGetCategoriesDataQuery, useLazyGetChartCategoriesDataQuery } from "@/redux/api/categoiresApi";
 
 const itemColumns = [
   { accessorKey: "name", header: "Item name" },
