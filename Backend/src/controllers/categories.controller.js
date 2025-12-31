@@ -4,30 +4,22 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { getDB } from "../utils/db.js";
 import { fetchWithCursor } from "../utils/fetchWithCursor.js";
 
-
-
-
-
-
-
-export const getTopPerformingItemData = asyncHandler(async (req, res) => {
+export const getTopPerformingCategoryData = asyncHandler(async (req, res) => {
   const db = getDB();
   const { deploymentId } = req.params;
 
   const deploymentObjectId = new ObjectId(deploymentId);
 
   const cursor = db.collection("bills").aggregate([
-    { 
-      $match: {
-        deployment_id: deploymentObjectId, _kots: {
-          $exists: true, $ne: [] 
-        } 
+    {
+      $match: { 
+        deployment_id: deploymentObjectId, _kots: { $exists: true, $ne: [] } 
       } 
     },
     { 
-      $project: { 
-        _id: 0, _kots: 1 
-      }
+      $project: {
+          _id: 0, _kots: 1 
+        }
     },
     { 
       $unwind: "$_kots" 
@@ -35,24 +27,24 @@ export const getTopPerformingItemData = asyncHandler(async (req, res) => {
     { 
       $unwind: "$_kots.items" 
     },
-    {
+    { 
       $group: {
-        _id: "$_kots.items.name",
+        _id: "$_kots.items.category.categoryName",
         totalSubtotal: { $sum: { $ifNull: ["$_kots.items.subtotal", 0] } }
       }
     },
-    {
-      $sort: { 
-        totalSubtotal: -1
+    { 
+      $sort: {
+        totalSubtotal: -1 
       } 
     },
-    { 
+    {
       $project: {
         _id: 0, name: "$_id", totalSubtotal: 1 
       } 
     },
-    { 
-      $limit: 20 
+    {
+       $limit: 5 
     }
   ]);
 
@@ -60,15 +52,14 @@ export const getTopPerformingItemData = asyncHandler(async (req, res) => {
 
   if (!result) throw new ApiError(404, "Data not found");
 
-  if (!result.length)
+  if (result.length === 0)
     return res.status(204).json({ data: [], message: "success" });
 
   return res.status(200).json({ data: result, message: "success" });
 });
 
 
-
-export const getItemData = asyncHandler(async (req, res) => {
+export const getCategoryData = asyncHandler(async (req, res) => {
   const db = getDB();
   const { deploymentId } = req.params;
 
@@ -81,11 +72,11 @@ export const getItemData = asyncHandler(async (req, res) => {
         } 
     },
     {
-      $project: { 
+      $project: {
         _id: 0, _kots: 1 
       } 
     },
-    { 
+    {
       $unwind: "$_kots" 
     },
     { 
@@ -93,21 +84,18 @@ export const getItemData = asyncHandler(async (req, res) => {
     },
     {
       $group: {
-        _id: "$_kots.items.name",
+        _id: "$_kots.items.category.categoryName",
         totalQuantity: { $sum: { $ifNull: ["$_kots.items.quantity", 0] } },
-        rate: { $first: "$_kots.items.rate" },
         totalSubtotal: { $sum: { $ifNull: ["$_kots.items.subtotal", 0] } }
       }
     },
-    { $sort: { _id: 1 } },
-    {
-      $project: {
-        _id: 0,
-        name: "$_id",
-        totalQuantity: 1,
-        rate: 1,
-        totalSubtotal: 1
-      }
+    { 
+      $sort: { _id: 1 } 
+    },
+    { 
+      $project: { 
+        _id: 0, name: "$_id", totalQuantity: 1, totalSubtotal: 1 
+      } 
     }
   ]);
 

@@ -5,14 +5,14 @@ export const categoriesApi = baseApi.injectEndpoints({
 
     getChartCategoriesData: builder.query({
       query: (deploymentId) => ({
-        url: `Top5_category_menu/${deploymentId}`,
+        url: `category/Top5_category_menu/${deploymentId}`,
         method: "POST",
       }),
     }),
 
     getCategoriesData: builder.query({
       query: (deploymentId) => ({
-        url: `category_data/${deploymentId}`,
+        url: `category/category_data/${deploymentId}`,
         method: "POST",
       }),
     }),

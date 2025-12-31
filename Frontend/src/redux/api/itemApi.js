@@ -5,14 +5,14 @@ export const itemsApi = baseApi.injectEndpoints({
 
     getChartItemsData: builder.query({
       query: (deploymentId) => ({
-        url: `Top20_item_menu/${deploymentId}`,
+        url: `items/Top20_item_menu/${deploymentId}`,
         method: "POST",
       }),
     }),
 
     getItemsData: builder.query({
       query: (deploymentId) => ({
-        url: `item_menu/${deploymentId}`,
+        url: `items/item_menu/${deploymentId}`,
         method: "POST",
       }),
     }),
