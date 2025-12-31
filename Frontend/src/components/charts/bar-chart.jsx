@@ -30,26 +30,26 @@ export default function TabSalesBarChart({
     const isDesktop = useMediaQuery("(min-width: 1024px)")
 
     return (
-        <Card className="min-w-0 flex flex-col justify-around w-full md:basis-[60%]">
+        <Card className="min-w-0 flex flex-col justify-between w-full md:basis-[60%]">
             <CardHeader >
                 <CardTitle>{title}</CardTitle>
                 <CardDescription>{description}</CardDescription>
             </CardHeader>
 
-            <CardContent className="flex min-h-80">
+            <CardContent className="flex min-h-100">
                 <ChartContainer config={chartConfig} className="w-full">
                         <BarChart
                             data={data}
                             barSize={20}
                             margin={isDesktop?{
                                 top: 10,
-                                right: 20,
-                                left: 20,
+                                right:20,
+                                left: 0,
                                 bottom: data.length > 6 ? 60 : 20
                             }:{
                                 top: 10,
                                 right: 10,
-                                left: 10,
+                                left: -40,
                                 bottom: data.length > 6 ? 50 : 10
                             }
                         }

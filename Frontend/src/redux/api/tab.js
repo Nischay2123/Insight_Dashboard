@@ -1,10 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi } from "./baseApi";
 
-export const tabs = createApi({
-  reducerPath: "tabs",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1",
-  }),
+export const tabsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
     getTabChartData: builder.query({
@@ -19,9 +15,10 @@ export const tabs = createApi({
     }),
 
   }),
+  overrideExisting: false,
 });
 
 export const {
   useGetTabChartDataQuery,
   useGetTabTableDataMutation
-} = tabs;
+} = tabsApi;

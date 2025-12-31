@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { setDeploymentId } from "@/redux/reducers/selectedDeployment";
-import { useGetDeploymentIdsQuery } from "@/redux/api/menu";
+import { useGetDeploymentIdsQuery } from "@/redux/api/deploymentIdApi";
 
 const SelectSidebar = () => {
   const dispatch = useDispatch();

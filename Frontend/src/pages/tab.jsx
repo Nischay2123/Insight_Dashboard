@@ -2,7 +2,7 @@ import TabSalesBarChart from "@/components/charts/bar-chart"
 import DataCard from "@/components/data-card/data-card"
 import SiteHeader from "@/components/site-header/site-header"
 import { SidebarInset } from "@/components/ui/sidebar"
-import { useGetTabChartDataQuery ,useGetTabTableDataMutation} from "@/redux/api/tab"
+import { useGetTabChartDataQuery, useGetTabTableDataMutation } from "@/redux/api/tab"
 import { useEffect, useState } from "react"
 
 const columns = [
