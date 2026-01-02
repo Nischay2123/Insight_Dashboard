@@ -1,11 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TabSalesBarChart from "@/components/charts/bar-chart";
 import SiteHeader from "@/components/site-header/site-header";
 import { SidebarInset } from "@/components/ui/sidebar";
 import DataCard from "@/components/data-card/data-card";
 import { useSelector } from "react-redux";
-import { useLazyGetChartItemsDataQuery, useLazyGetItemsDataQuery } from "@/redux/api/itemApi";
-import { useLazyGetCategoriesDataQuery, useLazyGetChartCategoriesDataQuery } from "@/redux/api/categoiresApi";
+
+import {
+  useLazyGetChartItemsDataQuery,
+  useLazyGetItemsDataQuery,
+} from "@/redux/api/itemApi";
+
+import {
+  useLazyGetCategoriesDataQuery,
+  useLazyGetChartCategoriesDataQuery,
+} from "@/redux/api/categoiresApi";
+
+import { RightSheetTable } from "@/components/rightSheetTable";
+import { useGetDeploymentWiseItemdataMutation } from "@/redux/api/deploymentIdApi";
 
 const itemColumns = [
   { accessorKey: "name", header: "Item name" },
@@ -20,7 +31,16 @@ const categoryColumns = [
   { accessorKey: "totalSubtotal", header: "Gross Sales" },
 ];
 
+const sheetColumns = [
+  { accessorKey: "_id", header: "Deployment Id" },
+  { accessorKey: "totalQuantity", header: "Quantity" },
+  { accessorKey: "grossSale", header: "Total Sales" },
+];
+
 const Item = () => {
+  const [open, setOpen] = useState(false);
+  const [sheetData, setSheetData] = useState([]);
+
   const deploymentId = useSelector(
     (state) => state.deployment.deploymentId
   );
@@ -65,11 +85,15 @@ const Item = () => {
     },
   ] = useLazyGetCategoriesDataQuery();
 
+  const [
+    getDeploymentWiseData,
+    { isLoading: isSheetLoading, isError: isSheetError },
+  ] = useGetDeploymentWiseItemdataMutation();
+
   useEffect(() => {
     if (deploymentId) {
       getChartItemsData(deploymentId);
       getItemsData(deploymentId);
-
       getChartCategoriesData(deploymentId);
       getCategoriesData(deploymentId);
     }
@@ -93,6 +117,17 @@ const Item = () => {
     isErrorCategories ||
     isErrorChartCategories;
 
+  const onBarClick = async (row) => {
+    try {
+      const res = await getDeploymentWiseData(row.name).unwrap();
+      setSheetData(res?.data ?? res ?? []);
+      setOpen(true);
+    } catch (err) {
+      console.error("Sheet API failed:", err);
+      setSheetData([]);
+    }
+  };
+
   return (
     <SidebarInset>
       <SiteHeader isDeployment={true} />
@@ -111,7 +146,6 @@ const Item = () => {
         </div>
       ) : (
         <div className="@container/main flex flex-col gap-4 pb-4">
-          
           <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
             <TabSalesBarChart
               title="Top Performing Items"
@@ -119,6 +153,7 @@ const Item = () => {
               data={apiChartItemsData?.data ?? []}
               xKey="name"
               yKey="totalSubtotal"
+              onBarClick={onBarClick}
             />
 
             <DataCard
@@ -147,6 +182,15 @@ const Item = () => {
           </div>
         </div>
       )}
+
+      <RightSheetTable
+        open={open}
+        onOpenChange={setOpen}
+        title="Deployment Wise Sales"
+        description="Sales & Quantity grouped by Deployment"
+        columns={sheetColumns}
+        data={isSheetLoading || isSheetError ? [] : sheetData}
+      />
     </SidebarInset>
   );
 };
