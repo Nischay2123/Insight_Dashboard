@@ -5,11 +5,6 @@ import { getDB } from "../utils/db.js";
 import { fetchWithCursor } from "../utils/fetchWithCursor.js";
 
 
-
-
-
-
-
 export const getTopPerformingItemData = asyncHandler(async (req, res) => {
   const db = getDB();
   const { deploymentId } = req.params;

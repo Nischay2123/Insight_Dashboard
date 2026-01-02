@@ -13,12 +13,13 @@ const corsOptions = {
       "http://localhost:5173",
       process.env.CLIENT_URL,
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"]
+    methods: ["GET", "POST", "PUT", "DELETE"],
 };
 
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(express.urlencoded({ extended: true }));
 
 (async () => {
   await connectDB();
