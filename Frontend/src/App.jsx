@@ -4,6 +4,7 @@ import { SidebarProvider } from "./components/ui/sidebar"
 import Tab from "./pages/tab"
 import Payment from "./pages/payment"
 import Item from "./pages/item"
+import DeploymentAnalytics from "./pages/deploymentAnalytics"
 
 
 
@@ -15,7 +16,8 @@ function App() {
       <SidebarProvider>
         <AppSidebar/>
         <Routes>
-        <Route path="/" element={<Tab />} />
+        <Route path="/" element={<DeploymentAnalytics />} />
+        <Route path="/tabs" element={<Tab />} />
         <Route path="/menu" element={<Item />} />
         </Routes>
       </SidebarProvider>

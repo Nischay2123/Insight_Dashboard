@@ -25,8 +25,13 @@ const data = {
   },
   liveAnalytics: [
     {
-      name: "Tabwise Analysis",
+      name: "Deployment Analysis",
       url: "/",
+      icon: MenuIcon,
+    },
+    {
+      name: "Tabwise Analysis",
+      url: "/tabs",
       icon: PieChart,
     },
     {
@@ -34,6 +39,7 @@ const data = {
       url: "/menu",
       icon: MenuIcon,
     },
+    
   ],
 }
 
