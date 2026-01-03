@@ -86,7 +86,6 @@ export const getDeployemntWiseItemData = asyncHandler(async (req, res) => {
   return res.status(200).json({ data: result, message: "success" });
 });
 
-
 export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
     const db = getDB();
 
@@ -214,10 +213,6 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 billDiscountAmount: {
                     $sum: ["$billDiscountAmount", "$totalDiscountKot"]
                 },
-                billTotalCharges: "$chargesAmount",
-                billTotalTax: {
-                    $sum: ["$totalTaxKot", "$chargesTax"],
-                },
                 billTotalAmount: "$totalAmountKot",
             }
         },
@@ -227,7 +222,16 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     deployment_id: "$deployment_id",
                     tabType: "$tabType"
                 },
-                totalOrdersOfTab: { $sum: 1 },
+                isVoid:{$first:"$isVoid"},
+                totalOrdersOfTab: { 
+                    $sum: {
+                        $cond: {
+                            if: { $eq: ["$isVoid", false] },
+                            then: 1,
+                            else: 0,
+                        }
+                    } 
+                },
                 netSales: {
                     $sum: {
                         $cond: {
@@ -340,25 +344,33 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 _id: "$_id.deployment_id",
                 tabDetails: {
                     $push: {
-                        tab: "$_id.tabType",
-                        totalOrdersOfTab: "$totalOrdersOfTab"
+                        $cond: [
+                            { $eq: ["$isVoid", false] },
+                            {
+                                tab: "$_id.tabType",
+                                totalOrdersOfTab: "$totalOrdersOfTab"
+                            },
+                            "$$REMOVE"  
+                        ]
+
                     }
                 },
-                netSales: { $first: "$netSales" },
-                grossSales: { $first: "$grossSales" },
-                totalBills: { $first: "$totalBills" },
-                totalCustomerServed: { $first: "$totalCustomerServed" },
-                totalDiscount: { $first: "$totalDiscount" },
-                totalCovers: { $first: "$totalCovers" },
-                voidBills: { $first: "$voidBills" },
-                deletedKot: { $first: "$deletedKot" },
-                dineInNetSales: { $first: "$dineInNetSales" },
-                dineInCovers: { $first: "$dineInCovers" }
+                netSales: { $sum: "$netSales" },
+                grossSales: { $sum: "$grossSales" },
+                totalBills: { $sum: "$totalBills" },
+                totalCustomerServed: { $sum: "$totalCustomerServed" },
+                totalDiscount: { $sum: "$totalDiscount" },
+                totalCovers: { $sum: "$totalCovers" },
+                voidBills: { $sum: "$voidBills" },
+                deletedKot: { $sum: "$deletedKot" },
+                dineInNetSales: { $sum: "$dineInNetSales" },
+                dineInCovers: { $sum: "$dineInCovers" }
             }
         },
         {
             $project:{
-                deployment_id:"$deployment_id",
+                _id:0,
+                deployment_id:"$_id",
                 tabDetails:1,
                 netSales:"$netSales",
                 grossSales:"$grossSales",
@@ -366,7 +378,7 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     $cond:[
                         { $gt:["$totalBills",0]},
                         { $round: [{ $divide: ["$netSales","$totalBills"] }, 2] },
-                        null
+                        0
                     ]
                 },
                 totalBills:"$totalBills",
@@ -377,16 +389,16 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 deletedKot:"$deletedKot",
                 averagePerCover:{
                     $cond:[
-                        { $gt:["$totalCustomerServed",0]},
-                        { $round: [{ $divide: ["$netSales","$totalCustomerServed"] }, 2] },
-                        null
+                        { $gt:["$totalCovers",0]},
+                        { $round: [{ $divide: ["$netSales","$totalCovers"] }, 2] },
+                        0
                     ]
                 },
                 averageRevenuePerUser:{
                     $cond:[
-                        { $gt:["$totalBills",0]},
-                        { $round: [{ $divide: ["$netSales","$totalBills"] }, 2] },
-                        null
+                        { $gt:["$totalCustomerServed",0]},
+                        { $round: [{ $divide: ["$netSales","$totalCustomerServed"] }, 2] },
+                        0
                     ]
                 },
                 dineInNetSales:"$dineInNetSales",
@@ -395,7 +407,7 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     $cond: [
                         { $gt: ["$dineInCovers", 0] },
                         { $round: [{ $divide: ["$dineInNetSales", "$dineInCovers"] }, 2] },
-                        null
+                        0
                     ]
                 }
             }   
@@ -406,3 +418,5 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
 
     return res.status(200).json({ data: data, message: "success" });
 })
+
+

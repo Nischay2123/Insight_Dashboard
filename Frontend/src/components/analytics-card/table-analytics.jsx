@@ -1,41 +1,73 @@
 import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+
+import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 
-const data = [
-  { id: 1, name: "Nischay", role: "Developer", status: "Active" },
-  { id: 2, name: "Rahul", role: "Designer", status: "Inactive" },
-  { id: 3, name: "Aman", role: "Manager", status: "Active" },
-]
 
-export default function AnaylyticsTable() {
+export function AnalyticsTable({ columns, data }) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
   return (
-    <Table >
-
+    <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead className="w-20">ID</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead className="text-right">Status</TableHead>
-        </TableRow>
+        {table.getHeaderGroups().map(headerGroup => (
+          <TableRow key={headerGroup.id} className="hover:bg-white">
+            {headerGroup.headers.map(header => (
+              <TableHead key={header.id} className="whitespace-nowrap ">
+                {header.isPlaceholder ? null : (
+                  <div
+                    className="p-0 m-1 flex items-center gap-1 "
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </div>
+                )}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
       </TableHeader>
 
       <TableBody>
-        {data.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>{row.id}</TableCell>
-            <TableCell className="font-medium">{row.name}</TableCell>
-            <TableCell>{row.role}</TableCell>
-            <TableCell className="text-right">{row.status}</TableCell>
+        {table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map(row => (
+            <TableRow key={row.id} className="text-gray-500">
+              {row.getVisibleCells().map(cell => (
+                <TableCell key={cell.id}>
+                  {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell
+              colSpan={columns.length}
+              className="text-center h-24"
+            >
+              No results.
+            </TableCell>
           </TableRow>
-        ))}
+        )}
       </TableBody>
     </Table>
   )
