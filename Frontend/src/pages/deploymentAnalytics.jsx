@@ -17,6 +17,25 @@ const sheetColumns = [
   { accessorKey: "totalBills", header: "Total Orders" },
 ]
 
+const getPreviousWeekDate = (dateStr) => {
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() - 7)
+  return d.toISOString().split("T")[0]
+}
+
+export function buildPreviousWeekMap(previousWeekData = []) {
+  const map = new Map()
+
+  for (const deployment of previousWeekData) {
+    if (!deployment?.deployment_id) continue
+
+    map.set(deployment.deployment_id, deployment)
+  }
+
+  return map
+}
+
+
 
 
 const DeploymentAnalytics = () => {
@@ -26,6 +45,7 @@ const DeploymentAnalytics = () => {
 
   const effectiveDate =
     selectedDate ?? "2025-12-29"
+  const previousWeekDate = getPreviousWeekDate(effectiveDate)
 
   const {
     data: deploymentData,
@@ -38,13 +58,24 @@ const DeploymentAnalytics = () => {
     }
   )
 
+  const {
+    data: previousWeekData,
+    isLoading: isPreviousLoading,
+    isError: isPreviousError,
+  } = useGetDeploymentWisedataQuery(
+    { date: previousWeekDate },
+    { skip: !previousWeekDate }
+  )
   const deployments = deploymentData?.data ?? []
+  const PrevMap = buildPreviousWeekMap(previousWeekData?.data)
 
   const [selectedDeployment, setSelectedDeployment] = useState(null)
+  const [selectedPrevDeployment, setSelectedPrevDeployment] = useState(null)
 
   useEffect(() => {
     if (deployments.length > 0) {
       setSelectedDeployment(deployments[0])
+      setSelectedPrevDeployment(PrevMap.get(deployments[0].deployment_id))
     } else {
       setSelectedDeployment(null)
     }
@@ -57,7 +88,10 @@ const DeploymentAnalytics = () => {
       <SiteHeader isDatePicker={true} />
 
       <div className="@container/main flex flex-col gap-4 pb-4">
-        <SectionCards deploymentData={selectedDeployment} />
+        <SectionCards
+          deploymentData={selectedDeployment}
+          prevData={selectedPrevDeployment}
+        />
 
         <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
           <ChartRadialStacked
@@ -66,6 +100,7 @@ const DeploymentAnalytics = () => {
             tabDetails={selectedDeployment?.tabDetails ?? []}
           />
           <AnalyticsData
+            prevData={selectedPrevDeployment}
             data={selectedDeployment}
             loading={isLoading}
             error={isError}
@@ -90,7 +125,10 @@ const DeploymentAnalytics = () => {
             columns={sheetColumns}
             loading={isLoading}
             selectedRowId={selectedDeployment?.deployment_id}
-            onRowClick={(row) => setSelectedDeployment(row)}
+            onRowClick={(row) => {
+              setSelectedDeployment(row)
+              setSelectedPrevDeployment(PrevMap.get(row.deployment_id))
+            }}
           />
         </div>
       </div>

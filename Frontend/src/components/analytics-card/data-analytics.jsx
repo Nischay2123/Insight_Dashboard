@@ -11,22 +11,36 @@ const columns = [
     accessorKey: "today",
     header: "Today",
   },
-  // {
-  //   accessorKey: "change",
-  //   header: "Change",
-  //   cell: ({ row }) => (
-  //     <span
-  //       className={
-  //         row.original.change >= 0
-  //           ? "text-green-600"
-  //           : "text-red-500"
-  //       }
-  //     >
-  //       {row.original.change} %
-  //     </span>
-  //   ),
-  // },
+  {
+    accessorKey: "change",
+    header: "Change",
+    cell: ({ row }) => {
+      const change = row.original.change
+      if (change == (null)) {
+        return <span className="text-gray-400">—</span>
+      }
+
+      if (Number(change) === 0) {
+        return <span className="text-gray-500">-</span>
+      }
+      return <span
+        className={
+          change >= 0
+            ? "text-green-600"
+            : "text-red-500"
+        }
+      >
+        {row.original.change} %
+      </span>
+    },
+  },
 ]
+
+
+function calculateChange(today, previous) {
+  if (previous === 0 || previous == null) return null
+  return (((today - previous) / previous) * 100).toFixed(2)
+}
 
 function deploymentToMetrics(deployment) {
   if (!deployment || typeof deployment !== "object") return []
@@ -44,6 +58,26 @@ function deploymentToMetrics(deployment) {
     { name: "Net Sales (Dine in)", today: deployment.dineInNetSales },
     { name: "Avg Per Cover (Dine in)", today: deployment.dineInAvgPerCover },
   ]
+}
+function deploymentToMetricsWithComparison(deployment, prevDeployment) {
+  if (!deployment || typeof deployment !== "object") return []
+
+  const prevMetrics = deploymentToMetrics(prevDeployment)
+
+  const prevMap = new Map()
+  prevMetrics.forEach(m => {
+    prevMap.set(m.name, m.today)
+  })
+
+  return deploymentToMetrics(deployment).map(metric => {
+    const prevValue = prevMap.get(metric.name)
+
+    return {
+      name: metric.name,
+      today: metric.today,
+      change: calculateChange(metric.today, prevValue),
+    }
+  })
 }
 
 function transformMetrics(data) {
@@ -69,10 +103,12 @@ function transformMetrics(data) {
 
 
 
-const AnalyticsData = ({data={}}) => {
-  console.log(data);
+const AnalyticsData = ({
+  data={},
+  prevData={}
+}) => {
   
-  const metricsArray = deploymentToMetrics(data)
+  const metricsArray = deploymentToMetricsWithComparison(data, prevData)
   const result = transformMetrics(metricsArray)
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   
