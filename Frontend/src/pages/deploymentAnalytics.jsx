@@ -1,44 +1,93 @@
-import AnalyticsData from '@/components/analytics-card/data-analytics'
-import TabSalesBarChart from '@/components/charts/bar-chart'
-import DataCard from '@/components/data-card/data-card'
-import SiteHeader from '@/components/site-header/site-header'
-import { SectionCards } from '@/components/SiteCards/section-cards'
-import { SidebarInset } from '@/components/ui/sidebar'
-import React from 'react'
+"use client"
+
+import React, { useEffect, useState } from "react"
+import { useSelector } from "react-redux"
+
+import AnalyticsData from "@/components/analytics-card/data-analytics"
+import TabSalesBarChart from "@/components/charts/bar-chart"
+import DataCard from "@/components/data-card/data-card"
+import SiteHeader from "@/components/site-header/site-header"
+import { SectionCards } from "@/components/SiteCards/section-cards"
+import { SidebarInset } from "@/components/ui/sidebar"
+
+import { useGetDeploymentWisedataQuery } from "@/redux/api/deploymentIdApi"
 
 const sheetColumns = [
-  { accessorKey: "_id", header: "Deployment Id" },
-  { accessorKey: "totalQuantity", header: "Quantity" },
-  { accessorKey: "grossSale", header: "Total Sales" },
-];
+  { accessorKey: "deployment_id", header: "Deployment Id" },
+  { accessorKey: "netSales", header: "Net Sales" },
+  { accessorKey: "totalBills", header: "Total Orders" },
+]
+
 const DeploymentAnalytics = () => {
+  const selectedDate = useSelector(
+    (state) => state.date?.selectedDate
+  )
+
+  const effectiveDate =
+    selectedDate ?? "2025-12-29"
+
+  const {
+    data: deploymentData,
+    isLoading,
+    isError,
+  } = useGetDeploymentWisedataQuery(
+    { date: effectiveDate },
+    {
+      skip: !effectiveDate,
+      refetchOnMountOrArgChange: true,
+    }
+  )
+
+  const deployments = deploymentData?.data ?? []
+
+  const [selectedDeployment, setSelectedDeployment] = useState(null)
+
+  useEffect(() => {
+    if (deployments.length > 0) {
+      setSelectedDeployment(deployments[0])
+    } else {
+      setSelectedDeployment(null)
+    }
+  }, [effectiveDate, deployments])
+
+
+  
   return (
     <SidebarInset>
-      <SiteHeader isDeployment={true} />
+      <SiteHeader isDatePicker={true} />
+
       <div className="@container/main flex flex-col gap-4 pb-4">
-        <SectionCards/>
-        
-      <div className="flex flex-col gap-4  px-4 lg:px-6 ">
-        <AnalyticsData />
-      </div>
+        <SectionCards deploymentData={selectedDeployment} />
 
-      <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
-            <TabSalesBarChart
-              title="Top Performing Items"
-              description="Top 20 performing items"
-              data={[]}
-              xKey="name"
-              yKey="totalSubtotal"
-              onBarClick={()=>{}}
-            />
+        <div className="flex flex-col gap-4 px-4 lg:px-6">
+          <AnalyticsData
+            data={selectedDeployment}
+            loading={isLoading}
+            error={isError}
+          />
+        </div>
 
-            <DataCard
-              description="Includes total sale, quantity and rate"
-              tab="Items"
-              data={[]}
-              columns={sheetColumns}
-            />
-          </div>
+        <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
+          <TabSalesBarChart
+            title="Top Deployments"
+            description="Top performing deployments as per sales"
+            data={deploymentData?.data ?? []}
+            xKey="deployment_id"
+            yKey="netSales"
+            onBarClick={() => {}}
+            loading={isLoading}
+          />
+
+          <DataCard
+            description="Per deployment live sales and orders"
+            tab="Deployments List"
+            data={deploymentData?.data ?? []}
+            columns={sheetColumns}
+            loading={isLoading}
+            selectedRowId={selectedDeployment?.deployment_id}
+            onRowClick={(row) => setSelectedDeployment(row)}
+          />
+        </div>
       </div>
     </SidebarInset>
   )

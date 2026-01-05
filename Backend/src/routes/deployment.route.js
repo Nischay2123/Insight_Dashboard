@@ -5,6 +5,6 @@ const router = Router()
 
 router.get("/deployment_data",getDeployemtsData);
 router.post("/item_deployment_data",getDeployemntWiseItemData);
-router.post("/deployment_data/:deployment_id",getDeploymentAnalytics);
+router.post("/deployment_data",getDeploymentAnalytics);
 
 export default router;

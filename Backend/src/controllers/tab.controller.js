@@ -38,9 +38,20 @@ export const tabTableData = asyncHandler(async (req, res) => {
 
 export const tabChartData = asyncHandler(async (req, res) => {
   const db = getDB();
+  const {date} = req.body;
+  const gdate = new Date(date);  
+  const nextDate = new Date(gdate);
+  nextDate.setDate(gdate.getDate() + 1);
 
   const cursor = db.collection("bills").aggregate([
-    { $match: { tab: { $ne: null } } },
+    { $match: { 
+        tab: { $ne: null },
+        "_created": {
+            $gte:gdate,
+            $lt: nextDate
+        },
+      },
+     },
     {
       $group: {
         _id: "$tab",

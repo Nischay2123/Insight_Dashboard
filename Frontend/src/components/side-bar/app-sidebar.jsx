@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+  ChartArea,
   DollarSign,
   icons,
   MenuIcon,
@@ -27,7 +28,7 @@ const data = {
     {
       name: "Deployment Analysis",
       url: "/",
-      icon: MenuIcon,
+      icon: ChartArea,
     },
     {
       name: "Tabwise Analysis",
@@ -50,7 +51,9 @@ export const  AppSidebar=React.memo(({ ...props })=> {
         Restroworks 
         <SidebarTrigger className="-ml-1" />
       </SidebarHeader>
-      <SidebarTrigger className="group-data-[state=expanded]:hidden ml-2 mt-2 sm:block hidden " />
+      <div className="group-data-[state=expanded]:hidden flex justify-center py-2">
+        <SidebarTrigger />
+      </div>
       <SidebarContent>
         <NavAnalytics projects={data.liveAnalytics} />
       </SidebarContent>

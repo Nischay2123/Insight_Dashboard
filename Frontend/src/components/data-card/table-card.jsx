@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, onRowClick, selectedRowId}) {
   const [sorting, setSorting] = useState([])
   const [globalFilter, setGlobalFilter] = useState("")
 
@@ -97,7 +97,17 @@ export function DataTable({ columns, data }) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map(row => (
-                <TableRow className={"text-gray-500 "} key={row.id}>
+                <TableRow key={row.id} onClick={() => onRowClick?.(row.original)}
+                className={`
+                  cursor-pointer
+                  text-gray-500
+                  hover:bg-muted
+                  ${
+                    row.original.deployment_id === selectedRowId
+                      ? "bg-muted"
+                      : ""
+                  }
+                `}>
                   {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id} >
                       {flexRender(

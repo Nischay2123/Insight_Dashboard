@@ -10,25 +10,25 @@ import {
 } from "@/components/ui/card"
 import { ChartRadialText } from "./chart-radial-text"
 
-const val=-20
-const prev_val=40
+// const val=-20
+// const prev_val=40
 
 const SectionCard = ({ item }) => {
   return (
     <Card className="@container/card py-2 bg-white w-full flex-row items-center justify-between gap-1">
-      <div className="flex-1 h-full w-25">
+      {/* <div className="flex-1 h-full w-25">
         <ChartRadialText/>
-      </div>
+      </div> */}
       <div className="flex-2 flex flex-col gap-4 ">
-      <CardHeader className={"p-0 text-gray-500"}>
-        Net Sales
+      <CardHeader className={" text-gray-500"}>
+        {item.name}
       </CardHeader>
-      <CardContent className={"p-0"}>
+      <CardContent className={""}>
           <CardTitle className={"text-2xl"}>
-              32483028.54
+              {item.today}
           </CardTitle>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-1.5 text-sm p-0">
+      {/* <CardFooter className="flex-col items-start gap-1.5 text-sm ">
         <CardDescription>
           <div className="flex flex-col text-[0.65rem]">
               <div className="flex justify-between gap-2 text-black">
@@ -45,7 +45,7 @@ const SectionCard = ({ item }) => {
               </div>
           </div>
         </CardDescription>
-      </CardFooter>
+      </CardFooter> */}
       </div>
     </Card>
   )
