@@ -70,13 +70,15 @@ function transformMetrics(data) {
 
 
 const AnalyticsData = ({data={}}) => {
+  console.log(data);
+  
   const metricsArray = deploymentToMetrics(data)
   const result = transformMetrics(metricsArray)
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   
   
   return (
-    <div className="flex flex-col p-6 border rounded-2xl gap-6">
+    <div className="basis-[60%] flex flex-col p-6 border rounded-2xl gap-6">
       <div className='flex flex-col justify-start'>
         <div className='text-xl px-3'>Other Metrics</div>
         <span className=' text-sm text-gray-500 px-3'>Track key metrics in real time</span>
