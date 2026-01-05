@@ -65,7 +65,7 @@ export function ChartRadialStacked({
         <CardDescription>{selectedDate ?? "2025-12-29"}</CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-1 items-center pb-0">
+      <CardContent className="flex flex-1 items-center pb-0 ">
         <ChartContainer
           config={config}
           className="mx-auto aspect-square w-full max-w-62.5"
@@ -121,8 +121,15 @@ export function ChartRadialStacked({
         </ChartContainer>
       </CardContent>
 
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="text-muted-foreground leading-none">
+      <CardFooter className="flex-col text-sm">
+        <div>
+          <ul className="flex font-semibold justify-center items-center gap-3">
+            <li>Table : {dataItem.table}</li>
+            <li>Delivery : {dataItem.delivery}</li>
+            <li>Take Out : {dataItem.takeout}</li>
+          </ul>
+        </div>
+        <div className="text-muted-foreground leading-none pt-2">
           {descriptionText}
         </div>
       </CardFooter>

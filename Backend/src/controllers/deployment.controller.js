@@ -224,7 +224,6 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     deployment_id: "$deployment_id",
                     tabType: "$tabType"
                 },
-                isVoid:{$first:"$isVoid"},
                 totalOrdersOfTab: { 
                     $sum: {
                         $cond: {
@@ -346,15 +345,10 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 _id: "$_id.deployment_id",
                 tabDetails: {
                     $push: {
-                        $cond: [
-                            { $eq: ["$isVoid", false] },
-                            {
-                                tab: "$_id.tabType",
-                                totalOrdersOfTab: "$totalOrdersOfTab"
-                            },
-                            "$$REMOVE"  
-                        ]
-
+                            
+                            tab: "$_id.tabType",
+                            totalOrdersOfTab: "$totalOrdersOfTab"
+                            
                     }
                 },
                 netSales: { $sum: "$netSales" },

@@ -51,7 +51,7 @@ export const  AppSidebar=React.memo(({ ...props })=> {
         Restroworks 
         <SidebarTrigger className="-ml-1" />
       </SidebarHeader>
-      <div className="group-data-[state=expanded]:hidden flex justify-center py-2">
+      <div className="group-data-[state=expanded]:hidden hidden md:flex justify-center py-2">
         <SidebarTrigger />
       </div>
       <SidebarContent>

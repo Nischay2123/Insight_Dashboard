@@ -40,9 +40,9 @@ function deploymentToMetrics(deployment) {
     { name: "Avg Per Bill", today: deployment.averagePerBill },
     { name: "Avg Per Cover", today: deployment.averagePerCover },
     { name: "ARPU", today: deployment.averageRevenuePerUser },
-    { name: "Covers (Dine In)", today: deployment.averageRevenuePerUser },
-    { name: "Net Sales (Dine in)", today: deployment.averageRevenuePerUser },
-    { name: "Avg Per Cover (Dine in)", today: deployment.averageRevenuePerUser },
+    { name: "Covers (Dine In)", today: deployment.dineInCovers },
+    { name: "Net Sales (Dine in)", today: deployment.dineInNetSales },
+    { name: "Avg Per Cover (Dine in)", today: deployment.dineInAvgPerCover },
   ]
 }
 
@@ -78,7 +78,7 @@ const AnalyticsData = ({data={}}) => {
   
   
   return (
-    <div className="basis-[60%] flex flex-col p-6 border rounded-2xl gap-6">
+    <div className="basis-[60%] flex flex-col p-3 border rounded-2xl gap-10">
       <div className='flex flex-col justify-start'>
         <div className='text-xl px-3'>Other Metrics</div>
         <span className=' text-sm text-gray-500 px-3'>Track key metrics in real time</span>
