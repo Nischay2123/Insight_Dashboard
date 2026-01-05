@@ -11,12 +11,15 @@ import { SectionCards } from "@/components/SiteCards/section-cards"
 import { SidebarInset } from "@/components/ui/sidebar"
 
 import { useGetDeploymentWisedataQuery } from "@/redux/api/deploymentIdApi"
+import { ChartRadialStacked } from "@/components/charts/chart-radial-stack"
 
 const sheetColumns = [
   { accessorKey: "deployment_id", header: "Deployment Id" },
   { accessorKey: "netSales", header: "Net Sales" },
   { accessorKey: "totalBills", header: "Total Orders" },
 ]
+
+
 
 const DeploymentAnalytics = () => {
   const selectedDate = useSelector(
@@ -59,7 +62,12 @@ const DeploymentAnalytics = () => {
       <div className="@container/main flex flex-col gap-4 pb-4">
         <SectionCards deploymentData={selectedDeployment} />
 
-        <div className="flex flex-col gap-4 px-4 lg:px-6">
+        <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
+          <ChartRadialStacked
+            title="Orders by Platform"
+            descriptionText="Orders distribution per platform"
+            tabDetails={selectedDeployment?.tabDetails ?? []}
+          />
           <AnalyticsData
             data={selectedDeployment}
             loading={isLoading}
