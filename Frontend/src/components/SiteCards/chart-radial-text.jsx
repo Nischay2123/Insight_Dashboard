@@ -16,7 +16,9 @@ const chartConfig = {
   safari: { label: "Safari", color: "var(--chart-2)" },
 }
 
-export function ChartRadialText() {
+export function ChartRadialText({data}) {
+  console.log(data);
+  
   return (
       <ChartContainer config={chartConfig} className="w-full h-full">
         
@@ -52,7 +54,7 @@ export function ChartRadialText() {
                           y={viewBox.cy}
                           className="fill-foreground text-lg font-bold"
                         >
-                          {chartData[0].visitors}
+                          {data.progress}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
