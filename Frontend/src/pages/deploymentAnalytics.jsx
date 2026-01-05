@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 
@@ -37,7 +35,6 @@ const DeploymentAnalytics = () => {
     { date: effectiveDate },
     {
       skip: !effectiveDate,
-      refetchOnMountOrArgChange: true,
     }
   )
 
@@ -64,8 +61,8 @@ const DeploymentAnalytics = () => {
 
         <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
           <ChartRadialStacked
-            title="Orders by Platform"
-            descriptionText="Orders distribution per platform"
+            title="Orders by Tabs"
+            descriptionText="Showing total per tab for the selected date"
             tabDetails={selectedDeployment?.tabDetails ?? []}
           />
           <AnalyticsData
