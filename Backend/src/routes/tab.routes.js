@@ -3,7 +3,7 @@ import { tabChartData, tabTableData } from "../controllers/tab.controller.js";
 
 const router = Router()
 
-router.get("/tab_chart_data",tabChartData);
+router.post("/tab_chart_data",tabChartData);
 router.post("/tab_table_data/:tab",tabTableData);
 
 export default router;

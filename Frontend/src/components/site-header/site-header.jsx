@@ -8,12 +8,14 @@ import { setDateRange } from "@/redux/reducers/data"
 import { useMediaQuery } from "@/customHooks/desktop"
 import DateRangeControls from './dataRangeControl';
 import SelectSidebar from "./selectSidebar"
+import DatePicker from "./datePicker"
 
 
 
 const SiteHeader = ({
   isDateFilter=false,
   isDeployment=false,
+  isDatePicker=false,
   options=[]
 }) => {
 
@@ -130,7 +132,10 @@ const SiteHeader = ({
       />
       }
 
-      
+      {
+        isDatePicker && 
+        < DatePicker />
+      }
 
     </header>
   )

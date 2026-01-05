@@ -1,10 +1,14 @@
 import { baseApi } from "./baseApi";
 
 export const tabsApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
+  endpoints: (builder) => ({ 
 
     getTabChartData: builder.query({
-      query: () => "tabs/tab_chart_data",
+      query: ({ date }) => ({
+        url: "/tabs/tab_chart_data",
+        method: "POST",
+        body: { date },
+      }),
     }),
 
     getTabTableData: builder.mutation({

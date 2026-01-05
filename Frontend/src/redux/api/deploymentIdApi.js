@@ -15,11 +15,18 @@ export const deploymentApi = baseApi.injectEndpoints({
         }
       }),
     }),
-
+    getDeploymentWisedata: builder.query({
+      query: ({ date }) => ({
+        url: "/deployment/deployment_data",
+        method: "POST",
+        body: { date },
+      }),
+    }),
   }),
 });
 
 export const {
   useGetDeploymentIdsQuery,
-  useGetDeploymentWiseItemdataMutation
+  useGetDeploymentWiseItemdataMutation,
+  useGetDeploymentWisedataQuery
 } = deploymentApi;

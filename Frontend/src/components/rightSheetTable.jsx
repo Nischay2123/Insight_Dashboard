@@ -38,7 +38,7 @@ export function RightSheetTable({
         </SheetHeader>
 
         <div className="m-6 h-full rounded-md">
-          <DataTable columns={columns} data={data} />
+          <DataTable columns={columns} data={data} selectedRowId={""}/>
         </div>
       </SheetContent>
     </Sheet>

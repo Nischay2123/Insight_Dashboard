@@ -86,19 +86,20 @@ export const getDeployemntWiseItemData = asyncHandler(async (req, res) => {
   return res.status(200).json({ data: result, message: "success" });
 });
 
-
 export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
     const db = getDB();
 
-    const date = new Date("2025-12-29");  
-    const nextDate = new Date(date);
-    nextDate.setDate(date.getDate() + 1);
+    const {date}= req.body
+
+    const gdate = new Date(date);  
+    const nextDate = new Date(gdate);
+    nextDate.setDate(gdate.getDate() + 1);
 
     const data = await db.collection("bills").aggregate([
         {
             $match: {
                 "_created": {
-                    $gte:date,
+                    $gte:gdate,
                     $lt: nextDate
                 },
                 "deployment_id":{$ne:null}
@@ -214,10 +215,6 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 billDiscountAmount: {
                     $sum: ["$billDiscountAmount", "$totalDiscountKot"]
                 },
-                billTotalCharges: "$chargesAmount",
-                billTotalTax: {
-                    $sum: ["$totalTaxKot", "$chargesTax"],
-                },
                 billTotalAmount: "$totalAmountKot",
             }
         },
@@ -227,7 +224,16 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     deployment_id: "$deployment_id",
                     tabType: "$tabType"
                 },
-                totalOrdersOfTab: { $sum: 1 },
+                isVoid:{$first:"$isVoid"},
+                totalOrdersOfTab: { 
+                    $sum: {
+                        $cond: {
+                            if: { $eq: ["$isVoid", false] },
+                            then: 1,
+                            else: 0,
+                        }
+                    } 
+                },
                 netSales: {
                     $sum: {
                         $cond: {
@@ -340,69 +346,90 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                 _id: "$_id.deployment_id",
                 tabDetails: {
                     $push: {
-                        tab: "$_id.tabType",
-                        totalOrdersOfTab: "$totalOrdersOfTab"
+                        $cond: [
+                            { $eq: ["$isVoid", false] },
+                            {
+                                tab: "$_id.tabType",
+                                totalOrdersOfTab: "$totalOrdersOfTab"
+                            },
+                            "$$REMOVE"  
+                        ]
+
                     }
                 },
-                netSales: { $first: "$netSales" },
-                grossSales: { $first: "$grossSales" },
-                totalBills: { $first: "$totalBills" },
-                totalCustomerServed: { $first: "$totalCustomerServed" },
-                totalDiscount: { $first: "$totalDiscount" },
-                totalCovers: { $first: "$totalCovers" },
-                voidBills: { $first: "$voidBills" },
-                deletedKot: { $first: "$deletedKot" },
-                dineInNetSales: { $first: "$dineInNetSales" },
-                dineInCovers: { $first: "$dineInCovers" }
+                netSales: { $sum: "$netSales" },
+                grossSales: { $sum: "$grossSales" },
+                totalBills: { $sum: "$totalBills" },
+                totalCustomerServed: { $sum: "$totalCustomerServed" },
+                totalDiscount: { $sum: "$totalDiscount" },
+                totalCovers: { $sum: "$totalCovers" },
+                voidBills: { $sum: "$voidBills" },
+                deletedKot: { $sum: "$deletedKot" },
+                dineInNetSales: { $sum: "$dineInNetSales" },
+                dineInCovers: { $sum: "$dineInCovers" }
             }
         },
         {
-            $project:{
-                deployment_id:"$deployment_id",
-                tabDetails:1,
-                netSales:"$netSales",
-                grossSales:"$grossSales",
-                averagePerBill:{
-                    $cond:[
-                        { $gt:["$totalBills",0]},
-                        { $round: [{ $divide: ["$netSales","$totalBills"] }, 2] },
-                        null
-                    ]
+            $project: {
+                _id: 0,
+                deployment_id: "$_id",
+                tabDetails: 1,
+
+                netSales: { $round: ["$netSales", 2] },
+                grossSales: { $round: ["$grossSales", 2] },
+
+                totalBills: "$totalBills",
+
+                averagePerBill: {
+                $cond: [
+                    { $gt: ["$totalBills", 0] },
+                    { $round: [{ $divide: ["$netSales", "$totalBills"] }, 2] },
+                    0
+                ]
                 },
-                totalBills:"$totalBills",
-                totalCustomerServed:"$totalCustomerServed",
-                totalDiscount:"$totalDiscount",
-                totalCovers:"$totalCovers",
-                voidBills:"$voidBills",
-                deletedKot:"$deletedKot",
-                averagePerCover:{
-                    $cond:[
-                        { $gt:["$totalCustomerServed",0]},
-                        { $round: [{ $divide: ["$netSales","$totalCustomerServed"] }, 2] },
-                        null
-                    ]
+
+                totalCustomerServed: "$totalCustomerServed",
+
+                averageRevenuePerUser: {
+                $cond: [
+                    { $gt: ["$totalCustomerServed", 0] },
+                    { $round: [{ $divide: ["$netSales", "$totalCustomerServed"] }, 2] },
+                    0
+                ]
                 },
-                averageRevenuePerUser:{
-                    $cond:[
-                        { $gt:["$totalBills",0]},
-                        { $round: [{ $divide: ["$netSales","$totalBills"] }, 2] },
-                        null
-                    ]
+
+                totalDiscount: { $round: ["$totalDiscount", 2] },
+                totalCovers: "$totalCovers",
+
+                averagePerCover: {
+                $cond: [
+                    { $gt: ["$totalCovers", 0] },
+                    { $round: [{ $divide: ["$netSales", "$totalCovers"] }, 2] },
+                    0
+                ]
                 },
-                dineInNetSales:"$dineInNetSales",
-                dineInCovers:"$dineInCovers",
-                dineInAvgPerCover:{
-                    $cond: [
-                        { $gt: ["$dineInCovers", 0] },
-                        { $round: [{ $divide: ["$dineInNetSales", "$dineInCovers"] }, 2] },
-                        null
-                    ]
+
+                voidBills: "$voidBills",
+                deletedKot: "$deletedKot",
+
+                dineInNetSales: { $round: ["$dineInNetSales", 2] },
+                dineInCovers: "$dineInCovers",
+
+                dineInAvgPerCover: {
+                $cond: [
+                    { $gt: ["$dineInCovers", 0] },
+                    { $round: [{ $divide: ["$dineInNetSales", "$dineInCovers"] }, 2] },
+                    0
+                ]
                 }
-            }   
+            }
         }
+
     ]).toArray();
 
     if (!data) throw new ApiError(404, "Data not found");
 
     return res.status(200).json({ data: data, message: "success" });
 })
+
+
