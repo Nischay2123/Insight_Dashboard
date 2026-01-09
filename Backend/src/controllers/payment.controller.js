@@ -20,7 +20,8 @@ export const paymentChartData = asyncHandler(async (req, res) => {
   {
     $project: {
       totals: {
-        $concatArrays:
+        $concatArrays: [
+          [{ type: "Cash", amount: { $sum: "$payments.cash" } }],
           {
             $map: {
               input: "$payments.cards",
@@ -31,17 +32,19 @@ export const paymentChartData = asyncHandler(async (req, res) => {
               }
             }
           }
+        ]
       }
     }
   },
-
   { $unwind: "$totals" },
-
   {
     $group: {
       _id: "$totals.type",
       totalAmount: { $sum: "$totals.amount" }
     }
+  },
+  {
+    $sort:{totalAmount:1}
   }
 ]);
 
