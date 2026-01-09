@@ -19,6 +19,7 @@ function App() {
         <Route path="/" element={<DeploymentAnalytics />} />
         <Route path="/tabs" element={<Tab />} />
         <Route path="/menu" element={<Item />} />
+        <Route path="/payment" element={<Payment />} />
         </Routes>
       </SidebarProvider>
   )

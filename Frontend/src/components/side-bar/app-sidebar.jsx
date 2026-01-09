@@ -2,7 +2,6 @@ import * as React from "react"
 import {
   ChartArea,
   DollarSign,
-  icons,
   MenuIcon,
   PieChart,
 } from "lucide-react"
@@ -39,6 +38,11 @@ const data = {
       name: "Menu Analysis",
       url: "/menu",
       icon: MenuIcon,
+    },
+    {
+      name: "Payment Analysis",
+      url: "/payment",
+      icon: DollarSign,
     },
     
   ],
