@@ -5,10 +5,23 @@ import { fetchWithCursor } from "../utils/fetchWithCursor.js";
 
 export const tabTableData = asyncHandler(async (req, res) => {
   const db = getDB();
-  const { tab } = req.params;
+  const { tab , date} = req.params;
+  // console.log(tab, date);
+  
+  const gdate = new Date(date);  
+  const nextDate = new Date(gdate);
+  nextDate.setDate(gdate.getDate() + 1);
 
   const cursor = db.collection("bills").aggregate([
-    { $match: { tab: tab } },
+    { $match: 
+      { 
+        tab: tab ,
+        "_created": {
+            $gte:gdate,
+            $lt: nextDate
+        },
+      },
+    },
     {
       $group: {
         _id: "$deployment_id",

@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { paymentChartData } from "../controllers/payment.controller.js";
+import { paymentChartData,paymentTableData } from "../controllers/payment.controller.js";
 
 const router = Router()
 
 router.post("/payment_chart_data",paymentChartData);
-// router.post("/tab_table_data/:tab",tabTableData);
+router.post("/payment_table_data/:paymentMode",paymentTableData);
 
 export default router;
