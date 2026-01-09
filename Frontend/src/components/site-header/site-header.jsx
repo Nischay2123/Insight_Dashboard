@@ -16,7 +16,8 @@ const SiteHeader = ({
   isDateFilter=false,
   isDeployment=false,
   isDatePicker=false,
-  options=[]
+  options=[],
+  headerTitle
 }) => {
 
 
@@ -101,7 +102,7 @@ const SiteHeader = ({
         />
         <div className="flex flex-col">
           <h1 className="text-xl font-bold leading-tight lg:text-2xl">
-            Dashboard Overview
+            {headerTitle ?? "Dashboard Overview"}
           </h1>
           <span className="hidden text-sm text-muted-foreground lg:block">
             Real-time aggregated analytics for all restaurant locations

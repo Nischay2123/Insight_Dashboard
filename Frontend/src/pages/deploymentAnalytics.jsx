@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useSelector } from "react-redux"
 
 import AnalyticsData from "@/components/analytics-card/data-analytics"
@@ -10,33 +10,7 @@ import { SidebarInset } from "@/components/ui/sidebar"
 
 import { useGetDeploymentWisedataQuery } from "@/redux/api/deploymentIdApi"
 import { ChartRadialStacked } from "@/components/charts/chart-radial-stack"
-
-const sheetColumns = [
-  { accessorKey: "deployment_id", header: "Deployment Id" },
-  { accessorKey: "netSales", header: "Net Sales" },
-  { accessorKey: "totalBills", header: "Total Orders" },
-]
-
-const getPreviousWeekDate = (dateStr) => {
-  const d = new Date(dateStr)
-  d.setDate(d.getDate() - 7)
-  return d.toISOString().split("T")[0]
-}
-
-export function buildPreviousWeekMap(previousWeekData = []) {
-  const map = new Map()
-
-  for (const deployment of previousWeekData) {
-    if (!deployment?.deployment_id) continue
-
-    map.set(deployment.deployment_id, deployment)
-  }
-
-  return map
-}
-
-
-
+import { buildPreviousWeekMap, getPreviousWeekDate, sheetColumns } from "@/utils/deployments"
 
 const DeploymentAnalytics = () => {
   const selectedDate = useSelector(
@@ -67,25 +41,30 @@ const DeploymentAnalytics = () => {
     { skip: !previousWeekDate }
   )
   const deployments = deploymentData?.data ?? []
-  const PrevMap = buildPreviousWeekMap(previousWeekData?.data)
+  const PrevMap = useMemo(()=> buildPreviousWeekMap(previousWeekData?.data),[previousWeekData?.data])
 
   const [selectedDeployment, setSelectedDeployment] = useState(null)
   const [selectedPrevDeployment, setSelectedPrevDeployment] = useState(null)
 
-  useEffect(() => {
-    if (deployments.length > 0) {
-      setSelectedDeployment(deployments[0])
-      setSelectedPrevDeployment(PrevMap.get(deployments[0].deployment_id))
-    } else {
-      setSelectedDeployment(null)
-    }
-  }, [effectiveDate, deployments])
+useEffect(() => {
+  if (!deployments.length) return
+
+  setSelectedDeployment((prev) => {
+    const deployment = prev ?? deployments[0]
+
+    setSelectedPrevDeployment(
+      PrevMap.get(deployment.deployment_id) ?? null
+    )
+
+    return deployment
+  })
+}, [deployments, PrevMap])
 
 
   
   return (
     <SidebarInset>
-      <SiteHeader isDatePicker={true} />
+      <SiteHeader isDatePicker={true} headerTitle={"Dashboard Overview Per Deployment"} />
 
       <div className="@container/main flex flex-col gap-4 pb-4">
         <SectionCards

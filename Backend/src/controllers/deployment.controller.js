@@ -86,6 +86,50 @@ export const getDeployemntWiseItemData = asyncHandler(async (req, res) => {
   return res.status(200).json({ data: result, message: "success" });
 });
 
+export const getDeployemntWiseCategoryData = asyncHandler(async (req, res) => {
+  const db = getDB();
+  const { name } = req.body;
+
+  
+
+
+  const cursor = db.collection("bills").aggregate([   
+    { 
+      $match: {
+        "_kots.items.category.categoryName": name 
+      } 
+    },
+    { 
+      $unwind: "$_kots" 
+    },
+    {
+      $unwind: "$_kots.items" 
+    },
+    {
+        $match:{ "_kots.items.category.categoryName":name}
+    },
+    {
+        $group:{
+            _id:"$deployment_id",
+            grossSale:{ $sum: { $ifNull: ["$_kots.items.subtotal", 0] } },
+            totalQuantity: { $sum: { $ifNull: ["$_kots.items.quantity", 0] } }
+        }
+    },
+    {
+        $sort:{_id:1}
+    }
+    ]);
+
+  const result = await fetchWithCursor(cursor);
+
+  if (!result) throw new ApiError(404, "Data not found");
+
+  if (!result.length)
+    return res.status(204).json({ data: [], message: "success" });
+
+  return res.status(200).json({ data: result, message: "success" });
+});
+
 export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
     const db = getDB();
 

@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 
@@ -63,9 +61,8 @@ const Tab = () => {
   useEffect(() => {
     if (!chartData?.data?.length) return
 
-    const firstTab = chartData.data[0]
-
-    ;(async () => {
+    const firstTab = chartData.data[0];
+    (async () => {
       setTab(firstTab.tab)
       const res = await triggerGetTabTable({
         tab: firstTab.tab,
@@ -93,7 +90,7 @@ const Tab = () => {
 
   return (
     <SidebarInset>
-      <SiteHeader isDatePicker={true} />
+      <SiteHeader isDatePicker={true} headerTitle={"Dashboard Overview Per Tab"}/>
 
       <div className="@container/main flex flex-col gap-2">
         <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
