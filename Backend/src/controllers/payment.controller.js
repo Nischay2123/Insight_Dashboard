@@ -68,9 +68,9 @@ export const paymentChartData = asyncHandler(async (req, res) => {
 
 export const paymentTableData = asyncHandler(async (req, res) => {
   const db = getDB();
-  const { paymentMode } = req.params;
-
-  const gdate = new Date("2025-12-29");  
+  const { paymentMode,date } = req.params;
+  
+  const gdate = new Date(date);  
   const nextDate = new Date(gdate);
   nextDate.setDate(gdate.getDate() + 1);
 
@@ -111,24 +111,25 @@ export const paymentTableData = asyncHandler(async (req, res) => {
             },
             tab:1
         }
-    });
-
-  pipeline.push({ $unwind: "$totals" });
-
-  pipeline.push({
-    $group: {
-      _id: "$tab",
-      totalAmount: {
-        $sum: {
-          $cond: [
-            { $eq: ["$totals.type", paymentMode] },
-            "$totals.amount",
-            0
-          ]
+    },
+    { 
+      $unwind: "$totals" 
+    },
+    {
+      $group: {
+        _id: "$tab",
+        totalAmount: {
+          $sum: {
+            $cond: [
+              { $eq: ["$totals.type", paymentMode] },
+              "$totals.amount",
+              0
+            ]
+          }
         }
       }
     }
-  });
+  );
 
   const cursor = db.collection("bills").aggregate(pipeline, { batchSize: 20 });
   const result = await fetchWithCursor(cursor);
