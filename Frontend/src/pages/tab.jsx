@@ -65,7 +65,7 @@ const Tab = () => {
     (async () => {
       setTab(firstTab.tab)
       const res = await triggerGetTabTable({
-        tab: firstTab.tab,
+        tab: firstTab.tab,date:effectiveDate
       })
       setTableData(res.data?.data ?? [])
     })()
@@ -74,7 +74,7 @@ const Tab = () => {
   const handleBarData = async (item) => {
     setTab(item.tab)
     const res = await triggerGetTabTable({
-      tab: item.tab,
+      tab: item.tab,date:effectiveDate
     })
     setTableData(res.data?.data ?? [])
   }

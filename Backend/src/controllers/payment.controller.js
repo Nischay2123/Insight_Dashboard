@@ -64,3 +64,78 @@ export const paymentChartData = asyncHandler(async (req, res) => {
     message: "success"
   });
 });
+
+
+export const paymentTableData = asyncHandler(async (req, res) => {
+  const db = getDB();
+  const { paymentMode } = req.params;
+
+  const gdate = new Date("2025-12-29");  
+  const nextDate = new Date(gdate);
+  nextDate.setDate(gdate.getDate() + 1);
+
+  const pipeline = [];
+
+  if (paymentMode === "Cash") {
+    pipeline.push({
+      $match: { 
+        "payments.cash": { $gte: 0 },
+        _created: { $gte: gdate, $lt: nextDate }
+      }
+    });
+  } else {
+    pipeline.push({
+      $match: { 
+        "payments.cards.cardType": paymentMode ,
+        _created: { $gte: gdate, $lt: nextDate }
+      }
+    });
+  }
+
+  pipeline.push({
+        $project:{
+            totals: {
+            $concatArrays: [
+                [{ type: "Cash", amount: { $sum: "$payments.cash" } }],
+                {
+                    $map: {
+                    input: "$payments.cards",
+                    as: "c",
+                    in: {
+                        type: "$$c.cardType",
+                        amount: "$$c.totalAmount"
+                    }
+                    }
+                }
+                ]
+            },
+            tab:1
+        }
+    });
+
+  pipeline.push({ $unwind: "$totals" });
+
+  pipeline.push({
+    $group: {
+      _id: "$tab",
+      totalAmount: {
+        $sum: {
+          $cond: [
+            { $eq: ["$totals.type", paymentMode] },
+            "$totals.amount",
+            0
+          ]
+        }
+      }
+    }
+  });
+
+  const cursor = db.collection("bills").aggregate(pipeline, { batchSize: 20 });
+  const result = await fetchWithCursor(cursor);
+
+  if (!result || result.length === 0) {
+    return res.status(204).json({ data: [], message: "success" });
+  }
+
+  return res.status(200).json({ data: result, message: "success" });
+});

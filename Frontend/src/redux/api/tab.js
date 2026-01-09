@@ -12,8 +12,8 @@ export const tabsApi = baseApi.injectEndpoints({
     }),
 
     getTabTableData: builder.mutation({
-      query: ({ tab }) => ({
-        url: `tabs/tab_table_data/${tab}`,
+      query: ({ tab,date }) => ({
+        url: `tabs/tab_table_data/${tab}/${date}`,
         method: "POST",
       }),
     }),
