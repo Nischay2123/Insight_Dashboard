@@ -23,8 +23,8 @@ const DeploymentAnalytics = () => {
 
   const {
     data: deploymentData,
-    isLoading,
-    isError,
+    isLoading:isCurrentLoading,
+    isError:isCurrentError,
   } = useGetDeploymentWisedataQuery(
     { date: effectiveDate },
     {
@@ -60,8 +60,19 @@ useEffect(() => {
   })
 }, [deployments, PrevMap])
 
+  const isLoading = isCurrentLoading || isPreviousLoading
 
-  
+  const isError = isCurrentError || isPreviousError
+
+  if (isLoading) return <div>Loading...</div>
+
+  if (isError){
+    return (
+      <div>
+        Error: {"Something went wrong"}
+      </div>
+    )
+  }
   return (
     <SidebarInset>
       <SiteHeader isDatePicker={true} headerTitle={"Dashboard Overview Per Deployment"} />

@@ -4,6 +4,6 @@ import { paymentChartData,paymentTableData } from "../controllers/payment.contro
 const router = Router()
 
 router.post("/payment_chart_data",paymentChartData);
-router.post("/payment_table_data/:paymentMode",paymentTableData);
+router.post("/payment_table_data/:paymentMode/:date",paymentTableData);
 
 export default router;

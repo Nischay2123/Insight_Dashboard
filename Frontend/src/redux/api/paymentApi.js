@@ -11,12 +11,12 @@ export const tabsApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // getTabTableData: builder.mutation({
-    //   query: ({ tab }) => ({
-    //     url: `tabs/tab_table_data/${tab}`,
-    //     method: "POST",
-    //   }),
-    // }),
+    getPaymentTableData: builder.mutation({
+      query: ({ paymentMode,date }) => ({
+        url: `payments/payment_table_data/${paymentMode}/${date}`,
+        method: "POST",
+      }),
+    }),
 
   }),
   overrideExisting: false,
@@ -24,5 +24,5 @@ export const tabsApi = baseApi.injectEndpoints({
 
 export const {
   useGetPaymentChartDataQuery,
-//   useGetTabTableDataMutation
+  useGetPaymentTableDataMutation
 } = tabsApi;
