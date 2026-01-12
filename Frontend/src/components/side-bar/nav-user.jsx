@@ -3,6 +3,7 @@ import {
   LogOut,
   Settings,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom";
 
 import {
   Avatar,
@@ -30,6 +31,7 @@ export const NavUser= React.memo( function ({
   user,
 }) {
   const { isMobile } = useSidebar()
+  const navigate = useNavigate();
 
   return (
     <SidebarMenu>
@@ -73,7 +75,7 @@ export const NavUser= React.memo( function ({
             <DropdownMenuGroup>
             </DropdownMenuGroup>
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/deployment_setting")}>
                 <Settings />
                 Settings
               </DropdownMenuItem>

@@ -7,28 +7,7 @@ import { fetchWithCursor } from "../utils/fetchWithCursor.js";
 export const getDeployemtsData = asyncHandler(async (req, res) => {
   const db = getDB();
 
-  const cursor = db.collection("bills").aggregate([
-    {
-      $project: {
-        _id: 0, deployment_id: 1 
-      } 
-    },
-    {
-      $match: {
-        deployment_id: { $ne: null } 
-      } 
-    },
-    { 
-      $group: {
-        _id: "$deployment_id" 
-      } 
-    },
-    {
-      $sort: {
-         _id: 1 
-        } 
-    }
-  ]);
+    const cursor = db.collection("deployments").find({});
 
   const result = await fetchWithCursor(cursor);
 
@@ -470,4 +449,91 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
     return res.status(200).json({ data: data, message: "success" });
 })
 
+export const createDeploymentGroup = asyncHandler(async (req, res) => {
+  const db = getDB();
+
+  const { name, deployments } = req.body;
+
+  // ---------- validations ----------
+  if (!name || typeof name !== "string") {
+    throw new ApiError(400, "Group name is required");
+  }
+
+  if (!Array.isArray(deployments) || deployments.length === 0) {
+    throw new ApiError(400, "deployments must be a non-empty array");
+  }
+
+  const normalizedDeployments = deployments.map((d) => {
+    if (!d?._id || !d?.name) {
+      throw new ApiError(
+        400,
+        "Each deployment must contain _id and name"
+      );
+    }
+
+    let objectId;
+    try {
+      objectId = new ObjectId(d._id);
+    } catch {
+      throw new ApiError(400, `Invalid ObjectId: ${d._id}`);
+    }
+
+    return {
+      _id: objectId,
+      name: d.name,
+    };
+  });
+//   console.log(normalizedDeployments);
+  
+  // ---------- prevent duplicate group name ----------
+  const existingGroup = await db
+    .collection("deploymentsGroup")
+    .findOne({ name });
+
+  if (existingGroup) {
+    throw new ApiError(409, "Deployment group already exists");
+  }
+
+  // ---------- insert ----------
+  const payload = {
+    name,
+    deployments: normalizedDeployments,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const result = await db
+    .collection("deploymentsGroup")
+    .insertOne(payload);
+
+  if (!result?.insertedId) {
+    throw new ApiError(500, "Failed to create deployment group");
+  }
+
+  return res.status(201).json({
+    data: {
+      _id: result.insertedId,
+      ...payload,
+    },
+    message: "Deployment group created successfully",
+  });
+});
+
+export const getDeploymentGroup = asyncHandler(async (req, res) => {
+  const db = getDB();
+
+  
+  const Groups = await db
+    .collection("deploymentsGroup")
+    .find({}).toArray();
+
+  if (!Groups) {
+    throw new ApiError(409, "NO Deployment group exists");
+  }
+
+  return res.status(201).json({
+    data: Groups,
+    message: "Deployment group fetched successfully",
+  });
+});
 

@@ -57,7 +57,7 @@ const SelectSidebar = () => {
         <SelectContent>
           {deploymentList?.map((d) => (
             <SelectItem key={d._id} value={d._id}>
-              {d._id}
+              {d.name}
             </SelectItem>
           ))}
         </SelectContent>
