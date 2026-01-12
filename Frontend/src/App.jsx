@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import { AppSidebar } from "./components/side-bar/app-sidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
 import { lazy, Suspense } from "react";
+import Deployemnts from "./pages/deployements";
 // import Tab from "./pages/tab"
 // import Payment from "./pages/payment"
 // import Item from "./pages/item"
@@ -28,6 +29,7 @@ function App() {
             <Route path="/tabs" element={<Tab />} />
             <Route path="/menu" element={<Item />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/deployment_setting" element={<Deployemnts />} />
           </Routes>
         </Suspense>
       </SidebarProvider>

@@ -75,7 +75,7 @@ useEffect(() => {
   }
   return (
     <SidebarInset>
-      <SiteHeader isDatePicker={true} headerTitle={"Dashboard Overview Per Deployment"} />
+      <SiteHeader isDatePicker={true} isDeploymentGroup={true} headerTitle={"Dashboard Overview Per Deployment"} />
 
       <div className="@container/main flex flex-col gap-4 pb-4">
         <SectionCards

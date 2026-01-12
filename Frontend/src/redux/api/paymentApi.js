@@ -18,8 +18,7 @@ export const tabsApi = baseApi.injectEndpoints({
       }),
     }),
 
-  }),
-  overrideExisting: false,
+  })
 });
 
 export const {
