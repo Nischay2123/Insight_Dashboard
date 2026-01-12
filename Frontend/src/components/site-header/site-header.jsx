@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { addDays, differenceInDays } from "date-fns";
 import { setDateRange } from "@/redux/reducers/data";
@@ -30,16 +30,27 @@ const SiteHeader = ({
   const [dateRange, setDateRangeState] = useState();
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [desktopCalendarOpen, setDesktopCalendarOpen] = useState(false);
+  const selectedDeploymentIds = useSelector(
+    (state) => state.deploymentGroup?.deploymentIds ?? []
+  );
+
+
+  const isGroupChecked = (group) => {
+  if (!group.deployments?.length) return false;
+
+  return group.deployments.every((d) =>
+    selectedDeploymentIds.includes(d._id)
+  );
+};
 
   const dispatch = useDispatch();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  /* ---------------- Fetch Groups ---------------- */
   const { data: groupsData } = useGetDeploymentGroupsQuery();
   const deploymentGroups = groupsData?.data ?? [];
 
-  /* ---------------- Group Selection ---------------- */
   const handleGroupToggle = (group, checked) => {
+
     const ids = group.deployments?.map((d) => d._id) ?? [];
 
     if (checked) {
@@ -49,7 +60,6 @@ const SiteHeader = ({
     }
   };
 
-  /* ---------------- Date Logic (unchanged) ---------------- */
   const applyPresetRange = (value) => {
     const today = new Date();
 
@@ -116,7 +126,6 @@ const SiteHeader = ({
   return (
     <div className="flex flex-col w-full">
       <header className="flex flex-col lg:flex-row lg:justify-between gap-4 lg:gap-2 h-auto lg:h-25">
-      {/* ---------------- Left Section ---------------- */}
       <div className="flex items-center gap-2 px-4 lg:p-6">
         <SidebarTrigger className="-ml-1 sm:hidden" />
         <Separator
@@ -133,11 +142,9 @@ const SiteHeader = ({
         </div>
       </div>
 
-      {/* ---------------- Existing Deployment Selector ---------------- */}
       {isDeployment && <SelectSidebar options={options} />}
 
       
-
       {/* ---------------- Date Controls ---------------- */}
       {isDateFilter && (
         <DateRangeControls
@@ -167,7 +174,8 @@ const SiteHeader = ({
                 key={group._id}
                 className="flex items-center gap-2 text-sm cursor-pointer"
               >
-                <Checkbox
+                <Checkbox 
+                  checked={isGroupChecked(group)}
                   onCheckedChange={(checked) =>
                     handleGroupToggle(group, checked)
                   }
