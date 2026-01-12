@@ -64,6 +64,9 @@ export function aggregateByIds(ids, dataMap) {
 
   return {
     ...aggregated,
+    averageRevenuePerUser:aggregated.totalCustomerServed > 0
+        ? (aggregated.netSales / aggregated.totalCustomerServed).toFixed(2)
+        : 0,
     averagePerBill:
       aggregated.totalBills > 0
         ? (aggregated.netSales / aggregated.totalBills).toFixed(2)

@@ -23,7 +23,7 @@ const SectionCard = ({ item }) => {
       </CardHeader>
       <CardContent className={""}>
           <CardTitle className={"text-2xl"}>
-              {item.today}
+              {Number(item.today).toFixed(2)}
           </CardTitle>
       </CardContent>
       <CardFooter className="flex-col items-start gap-1.5 text-sm ">

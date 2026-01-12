@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import AnalyticsData from "@/components/analytics-card/data-analytics";
@@ -10,7 +10,10 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { ChartRadialStacked } from "@/components/charts/chart-radial-stack";
 
 import { useGetDeploymentWisedataQuery } from "@/redux/api/deploymentIdApi";
-import { clearDeploymentIds } from "@/redux/reducers/deploymentGroupSlice";
+import {
+  clearDeploymentIds,
+  addDeploymentIds,
+} from "@/redux/reducers/deploymentGroupSlice";
 
 import {
   buildPreviousWeekMap,
@@ -62,53 +65,33 @@ const DeploymentAnalytics = () => {
     [prevDeployments]
   );
 
-  const [selectedDeployment, setSelectedDeployment] = useState(null);
-  const [selectedPrevDeployment, setSelectedPrevDeployment] = useState(null);
+  const allDeploymentIds = useMemo(
+    () => deployments.map((d) => d.deployment_id),
+    [deployments]
+  );
 
-  useEffect(() => {
-    if (!deployments.length) return;
-
-    setSelectedDeployment((prev) => {
-      const deployment = prev ?? deployments[0];
-      setSelectedPrevDeployment(
-        prevMap.get(deployment.deployment_id) ?? null
-      );
-      return deployment;
-    });
-  }, [deployments, prevMap]);
+  const effectiveDeploymentIds = useMemo(
+    () =>
+      selectedGroupDeploymentIds.length > 0
+        ? selectedGroupDeploymentIds
+        : allDeploymentIds,
+    [selectedGroupDeploymentIds, allDeploymentIds]
+  );
 
   const aggregatedDeployment = useMemo(() => {
-    if (!selectedGroupDeploymentIds.length) return null;
-    return aggregateByIds(selectedGroupDeploymentIds, currentMap);
-  }, [selectedGroupDeploymentIds, currentMap]);
-
-  useEffect(() => {
-  if (selectedGroupDeploymentIds.length > 0) {
-    setSelectedDeployment(null);
-    setSelectedPrevDeployment(null);
-  }
-}, [selectedGroupDeploymentIds]);
-
+    if (!effectiveDeploymentIds.length) return null;
+    return aggregateByIds(effectiveDeploymentIds, currentMap);
+  }, [effectiveDeploymentIds, currentMap]);
 
   const aggregatedPrevDeployment = useMemo(() => {
-    if (!selectedGroupDeploymentIds.length) return null;
-    return aggregateByIds(selectedGroupDeploymentIds, prevMap);
-  }, [selectedGroupDeploymentIds, prevMap]);
-
-  const finalDeploymentData =
-    selectedGroupDeploymentIds.length > 0
-      ? aggregatedDeployment
-      : selectedDeployment;
-
-  const finalPrevDeploymentData =
-    selectedGroupDeploymentIds.length > 0
-      ? aggregatedPrevDeployment
-      : selectedPrevDeployment;
+    if (!effectiveDeploymentIds.length) return null;
+    return aggregateByIds(effectiveDeploymentIds, prevMap);
+  }, [effectiveDeploymentIds, prevMap]);
 
   const isLoading = isCurrentLoading || isPreviousLoading;
   const isError = isCurrentError || isPreviousError;
 
-  if (isLoading) return <SkeletonCard/>;
+  if (isLoading) return <SkeletonCard />;
   if (isError) return <div>Error: Something went wrong</div>;
 
   return (
@@ -121,20 +104,20 @@ const DeploymentAnalytics = () => {
 
       <div className="@container/main flex flex-col gap-4 pb-4">
         <SectionCards
-          deploymentData={finalDeploymentData}
-          prevData={finalPrevDeploymentData}
+          deploymentData={aggregatedDeployment}
+          prevData={aggregatedPrevDeployment}
         />
 
         <div className="flex flex-col gap-4 px-4 lg:px-6 lg:flex-row">
           <ChartRadialStacked
             title="Orders by Tabs"
             descriptionText="Showing total per tab for the selected date"
-            tabDetails={finalDeploymentData?.tabDetails ?? []}
+            tabDetails={aggregatedDeployment?.tabDetails ?? []}
           />
 
           <AnalyticsData
-            data={finalDeploymentData}
-            prevData={finalPrevDeploymentData}
+            data={aggregatedDeployment}
+            prevData={aggregatedPrevDeployment}
             loading={isLoading}
             error={isError}
           />
@@ -157,13 +140,11 @@ const DeploymentAnalytics = () => {
             data={deployments}
             columns={sheetColumns}
             loading={isLoading}
-            selectedRowId={selectedDeployment?.deployment_id}
             onRowClick={(row) => {
               dispatch(clearDeploymentIds());
-              setSelectedDeployment(row);
-              setSelectedPrevDeployment(
-                prevMap.get(row.deployment_id) ?? null
-              );
+              setTimeout(() => {
+                dispatch(addDeploymentIds([row.deployment_id]));
+              }, 0);
             }}
           />
         </div>
