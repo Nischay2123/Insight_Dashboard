@@ -9,6 +9,7 @@ import {
 } from "../ui/select";
 import { setDeploymentId } from "@/redux/reducers/selectedDeployment";
 import { useGetDeploymentIdsQuery } from "@/redux/api/deploymentIdApi";
+import { SkeletonCard } from "../loading";
 
 const SelectSidebar = () => {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ const SelectSidebar = () => {
     dispatch(setDeploymentId(v));
   };
 
-  if (isLoading) return <div className="px-4">Loading deployments…</div>;
+  if (isLoading) return <SkeletonCard/>;
   if (isError)
     return (
       <div className="px-4 text-red-500">

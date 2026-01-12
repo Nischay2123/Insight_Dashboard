@@ -18,6 +18,7 @@ import {
   sheetColumns,
   aggregateByIds,
 } from "@/utils/deployments";
+import { SkeletonCard } from "@/components/loading";
 
 const DeploymentAnalytics = () => {
   const dispatch = useDispatch();
@@ -107,7 +108,7 @@ const DeploymentAnalytics = () => {
   const isLoading = isCurrentLoading || isPreviousLoading;
   const isError = isCurrentError || isPreviousError;
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <SkeletonCard/>;
   if (isError) return <div>Error: Something went wrong</div>;
 
   return (

@@ -10,6 +10,7 @@ import {
   useGetTabChartDataQuery,
   useGetTabTableDataMutation,
 } from "@/redux/api/tab"
+import { SkeletonCard } from "@/components/loading"
 
 const columns = [
   {
@@ -79,7 +80,7 @@ const Tab = () => {
     setTableData(res.data?.data ?? [])
   }
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <SkeletonCard/>
 
   if (isError)
     return (

@@ -15,6 +15,7 @@ import {
   sheetColumns,
 } from "@/utils/item";
 import { useItemCategoryData } from "@/customHooks/items";
+import { SkeletonCard } from "@/components/loading";
 
 const Item = () => {
   const deploymentId = useSelector(
@@ -74,9 +75,9 @@ const Item = () => {
       <SiteHeader isDeployment headerTitle={"Dashboard Overview Per Item"} />
 
       {!deploymentId ? (
-        <div className="p-6">Loading deployments…</div>
+        <SkeletonCard/>
       ) : isLoading ? (
-        <div className="p-6">Loading data…</div>
+        <SkeletonCard/>
       ) : isError ? (
         <div className="p-6 text-red-500">{errorMessage}</div>
       ) : (

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react'
 
 import {useGetPaymentChartDataQuery, useGetPaymentTableDataMutation} from "@/redux/api/paymentApi"
 import { useSelector } from 'react-redux'
+import { SkeletonCard } from '@/components/loading'
 
 const columns = [
   {
@@ -69,7 +70,7 @@ const Payment = () => {
   }
 
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <SkeletonCard/>
 
   if (isError){
     return (

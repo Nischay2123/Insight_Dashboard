@@ -454,7 +454,6 @@ export const createDeploymentGroup = asyncHandler(async (req, res) => {
 
   const { name, deployments } = req.body;
 
-  // ---------- validations ----------
   if (!name || typeof name !== "string") {
     throw new ApiError(400, "Group name is required");
   }
@@ -485,7 +484,6 @@ export const createDeploymentGroup = asyncHandler(async (req, res) => {
   });
 //   console.log(normalizedDeployments);
   
-  // ---------- prevent duplicate group name ----------
   const existingGroup = await db
     .collection("deploymentsGroup")
     .findOne({ name });
@@ -494,7 +492,6 @@ export const createDeploymentGroup = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Deployment group already exists");
   }
 
-  // ---------- insert ----------
   const payload = {
     name,
     deployments: normalizedDeployments,
@@ -537,3 +534,78 @@ export const getDeploymentGroup = asyncHandler(async (req, res) => {
   });
 });
 
+export const updateDeploymentGroup = asyncHandler(async (req, res) => {
+  const db = getDB();
+  const { id } = req.params;
+  const { name } = req.body;
+
+  if (!ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid deployment group id");
+  }
+
+  if (!name || typeof name !== "string") {
+    throw new ApiError(400, "Group name is required");
+  }
+
+  const existingGroup = await db
+    .collection("deploymentsGroup")
+    .findOne({ _id: new ObjectId(id) });
+
+  if (!existingGroup) {
+    throw new ApiError(404, "Deployment group not found");
+  }
+
+  const duplicate = await db
+    .collection("deploymentsGroup")
+    .findOne({
+      name,
+      _id: { $ne: new ObjectId(id) },
+    });
+
+  if (duplicate) {
+    throw new ApiError(409, "Deployment group with this name already exists");
+  }
+
+  const result = await db
+    .collection("deploymentsGroup")
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          name,
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" }
+    );
+
+  return res.status(200).json({
+    data: result.value,
+    message: "Deployment group updated successfully",
+  });
+});
+
+
+
+export const deleteDeploymentGroup = asyncHandler(async (req, res) => {
+  const db = getDB();
+  const { id } = req.params;
+
+  if (!ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid deployment group id");
+  }
+
+  const result = await db
+    .collection("deploymentsGroup")
+    .findOneAndDelete({
+      _id: new ObjectId(id),
+    });
+    if (!result) {
+        throw new ApiError(404,"Deployment Group not present with this id")
+    }
+    
+  return res.status(200).json({
+    data: result,
+    message: "Deployment group deleted successfully",
+  });
+});

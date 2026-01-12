@@ -3,10 +3,7 @@ import { AppSidebar } from "./components/side-bar/app-sidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
 import { lazy, Suspense } from "react";
 import Deployemnts from "./pages/deployements";
-// import Tab from "./pages/tab"
-// import Payment from "./pages/payment"
-// import Item from "./pages/item"
-// import DeploymentAnalytics from "./pages/deploymentAnalytics"
+import  { SkeletonCard } from "./components/loading";
 const DeploymentAnalytics = lazy(() =>
   import("./pages/deploymentAnalytics")
 );
@@ -23,7 +20,7 @@ function App() {
   return (
       <SidebarProvider>
         <AppSidebar/>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<SkeletonCard/>}>
           <Routes>
             <Route path="/" element={<DeploymentAnalytics />} />
             <Route path="/tabs" element={<Tab />} />

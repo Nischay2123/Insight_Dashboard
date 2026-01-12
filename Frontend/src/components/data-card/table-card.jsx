@@ -28,7 +28,9 @@ import {
 } from "lucide-react"
 
 
-export function DataTable({ columns, data, onRowClick, selectedRowId}) {
+export function DataTable({ columns, data, onRowClick, selectedRowId, rowSelection,
+  onRowSelectionChange
+}) {
   const [sorting, setSorting] = useState([])
   const [globalFilter, setGlobalFilter] = useState("")
 
@@ -37,8 +39,12 @@ export function DataTable({ columns, data, onRowClick, selectedRowId}) {
     columns,
     state: {
       sorting,
-      globalFilter
+      globalFilter,
+      rowSelection,
     },
+    onRowSelectionChange,
+    enableRowSelection: true,
+    getRowId: (row) => row._id,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
@@ -97,16 +103,22 @@ export function DataTable({ columns, data, onRowClick, selectedRowId}) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map(row => (
-                <TableRow key={row.id} onClick={() => onRowClick?.(row.original)}
-                className={`
+                <TableRow key={row.id}
+                  onClick={() => {
+                    if (onRowClick) {
+                      onRowClick(row.original);
+                    } else {
+                      row.toggleSelected();
+                    }
+                  }}
+                  className={`
                   cursor-pointer
                   text-gray-500
                   hover:bg-muted
-                  ${
-                    row.original.deployment_id === selectedRowId
+                  ${row.original.deployment_id === selectedRowId
                       ? "bg-muted"
                       : ""
-                  }
+                    }
                 `}>
                   {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id} >
