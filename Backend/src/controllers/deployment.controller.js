@@ -112,12 +112,18 @@ export const getDeployemntWiseCategoryData = asyncHandler(async (req, res) => {
 export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
     const db = getDB();
 
-    const {date}= req.body
+    const {date,deploymentIds}= req.body
 
     const gdate = new Date(date);  
     const nextDate = new Date(gdate);
     nextDate.setDate(gdate.getDate() + 1);
 
+    let deploymentObjectIds;
+    if (deploymentIds) {
+        deploymentObjectIds=deploymentIds.map((id)=> new ObjectId(id))
+    }
+    // console.log(deploymentObjectIds);
+    
     const data = await db.collection("bills").aggregate([
         {
             $match: {
@@ -125,7 +131,10 @@ export const getDeploymentAnalytics = asyncHandler(async(req,res)=>{
                     $gte:gdate,
                     $lt: nextDate
                 },
-                "deployment_id":{$ne:null}
+                deployment_id:
+                    Array.isArray(deploymentIds) && deploymentIds.length > 0
+                        ? { $in: deploymentObjectIds }
+                        : { $ne: null },
             }
         },
         {

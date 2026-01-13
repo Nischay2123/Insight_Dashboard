@@ -39,7 +39,7 @@ const SectionCard = ({ item }) => {
                 From last week same day
               </div>
               <div className="flex flex-justify-between gap-2 text-gray-500">
-                Progress compared to <span className="text-black">{item.prev}</span>
+                Progress compared to <span className="text-black">{Number(item.prev).toFixed(2)}</span>
               </div>
           </div>
         </CardDescription>

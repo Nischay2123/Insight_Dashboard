@@ -34,10 +34,10 @@ export const deploymentApi = baseApi.injectEndpoints({
     }),
 
     getDeploymentWisedata: builder.query({
-      query: ({ date }) => ({
+      query: ({ date ,deploymentIds}) => ({
         url: "/deployment/deployment_data",
         method: "POST",
-        body: { date },
+        body: { date , ...(deploymentIds?.length > 0 && { deploymentIds })},
       }),
     }),
 

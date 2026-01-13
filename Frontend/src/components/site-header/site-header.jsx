@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import { addDays, differenceInDays } from "date-fns";
 import { setDateRange } from "@/redux/reducers/data";
@@ -33,18 +33,14 @@ const SiteHeader = ({
   const [dateRange, setDateRangeState] = useState();
   const [showMobileCalendar, setShowMobileCalendar] = useState(false);
   const [desktopCalendarOpen, setDesktopCalendarOpen] = useState(false);
-  const selectedDeploymentIds = useSelector(
-    (state) => state.deploymentGroup?.deploymentIds ?? []
-  );
+  const [selectedGroupIds, setSelectedGroupIds] = useState([]);
+
 
 
   const isGroupChecked = (group) => {
-    if (!group.deployments?.length) return false;
-
-    return group.deployments.every((d) =>
-      selectedDeploymentIds.includes(d._id)
-    );
+    return selectedGroupIds.includes(group._id);
   };
+
 
   const dispatch = useDispatch();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -52,25 +48,25 @@ const SiteHeader = ({
   const { data: groupsData } = useGetDeploymentGroupsQuery();
   const deploymentGroups = groupsData?.data ?? [];
 
-  const getIdsFromOtherCheckedGroups = (currentGroupId) => {
-    return deploymentGroups
-      .filter(
-        (g) =>
-          g._id !== currentGroupId &&
-          isGroupChecked(g) 
-      )
-      .flatMap((g) => g.deployments.map((d) => d._id));
-  };
 
   const handleGroupToggle = (group, checked) => {
-
     const ids = group.deployments?.map((d) => d._id) ?? [];
-    console.log(ids);
-    
+
     if (checked) {
+      setSelectedGroupIds((prev) => [...prev, group._id]);
       dispatch(addDeploymentIds(ids));
     } else {
-      const otherGroupIds = getIdsFromOtherCheckedGroups(group._id);
+      setSelectedGroupIds((prev) =>
+        prev.filter((id) => id !== group._id)
+      );
+
+      const otherGroupIds = deploymentGroups
+        .filter(
+          (g) =>
+            g._id !== group._id &&
+            selectedGroupIds.includes(g._id)
+        )
+        .flatMap((g) => g.deployments.map((d) => d._id));
 
       const idsToRemove = ids.filter(
         (id) => !otherGroupIds.includes(id)
@@ -79,6 +75,7 @@ const SiteHeader = ({
       dispatch(removeDeploymentIds(idsToRemove));
     }
   };
+
 
   const applyPresetRange = (value) => {
     const today = new Date();
@@ -184,7 +181,7 @@ const SiteHeader = ({
         {isDatePicker && <DatePicker />}
       </header>
 
-      <div className="flex items-center gap-2 px-4 lg:p-6">
+      <div className="flex items-center gap-2 lg:p-6">
         {isDeploymentGroup && deploymentGroups.length > 0 && (
           <div className="px-4 lg:px-0 flex flex-col gap-2">
 

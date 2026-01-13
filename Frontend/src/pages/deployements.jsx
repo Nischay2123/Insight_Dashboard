@@ -90,38 +90,6 @@ const Deployemnts = () => {
   if (isLoading) return <SkeletonCard />;
   if (isError) return <ErrorState />;
 
-  // const handleRowClick = async(row) => {
-  //   await setSelectedRows((prev) =>
-  //     prev.includes(row._id)
-  //       ? prev.filter((id) => id !== row._id)
-  //       : [...prev, row._id]
-  //   );
-
-  //   console.log(selectedRows);
-
-  // };
-
-  // const handleCreateGroup = async () => {
-  //   const trimmedName = groupName.trim();
-  //   if (!trimmedName || !selectedRows.length) return;
-
-  //   const deploymentsPayload = deploymentList
-  //     .filter((d) => selectedRows.includes(d._id))
-  //     .map((d) => ({ _id: d._id, name: d.name }));
-
-  //   try {
-  //     await createDeploymentGroup({
-  //       name: trimmedName,
-  //       deployments: deploymentsPayload,
-  //     }).unwrap();
-
-  //     setSelectedRows([]);
-  //     setGroupName("");
-  //   } catch (err) {
-  //     console.error("Failed to create deployment group", err);
-  //   }
-  // };
-
   const handleCreateGroup = async () => {
     const trimmedName = groupName.trim();
     if (!trimmedName || !selectedDeploymentIds.length) return;
@@ -136,7 +104,6 @@ const Deployemnts = () => {
         deployments: deploymentsPayload,
       }).unwrap();
 
-      // ✅ RESET TABLE SELECTION
       setRowSelection({});
       setGroupName("");
     } catch (err) {
@@ -227,14 +194,14 @@ const Deployemnts = () => {
                           {group.deployments?.length || 0}
                         </Badge>
 
-                        <Button
+                        {/* <Button
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-yellow-500 hover:text-yellow-600 hover:bg-amber-200"
                           onClick={() => handleEditGroup(group)}
                         >
                           <Edit2 className="h-4 w-4" />
-                        </Button>
+                        </Button> */}
 
                         <Button
                           size="icon"

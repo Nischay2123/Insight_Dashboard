@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useMemo, useState, useEffect } from "react";
+import {  useSelector } from "react-redux";
 
 import AnalyticsData from "@/components/analytics-card/data-analytics";
 import TabSalesBarChart from "@/components/charts/bar-chart";
@@ -10,10 +10,6 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { ChartRadialStacked } from "@/components/charts/chart-radial-stack";
 
 import { useGetDeploymentWisedataQuery } from "@/redux/api/deploymentIdApi";
-import {
-  clearDeploymentIds,
-  addDeploymentIds,
-} from "@/redux/reducers/deploymentGroupSlice";
 
 import {
   buildPreviousWeekMap,
@@ -24,36 +20,58 @@ import {
 import { SkeletonCard } from "@/components/loading";
 
 const DeploymentAnalytics = () => {
-  const dispatch = useDispatch();
 
   const selectedDate = useSelector((state) => state.date?.selectedDate);
   const selectedGroupDeploymentIds = useSelector(
     (state) => state.deploymentGroup?.deploymentIds ?? []
   );
 
+
+  const [focusedDeploymentId, setFocusedDeploymentId] = useState(null);
+
+
+  useEffect(() => {
+    setFocusedDeploymentId(null);
+  }, [selectedGroupDeploymentIds]);
+
+
   const effectiveDate = selectedDate ?? "2025-12-29";
   const previousWeekDate = getPreviousWeekDate(effectiveDate);
+
+
+  const currentQueryParams = useMemo(() => {
+    return selectedGroupDeploymentIds.length > 0
+      ? { date: effectiveDate, deploymentIds: selectedGroupDeploymentIds }
+      : { date: effectiveDate };
+  }, [effectiveDate, selectedGroupDeploymentIds]);
+
+  const previousQueryParams = useMemo(() => {
+    return selectedGroupDeploymentIds.length > 0
+      ? { date: previousWeekDate, deploymentIds: selectedGroupDeploymentIds }
+      : { date: previousWeekDate };
+  }, [previousWeekDate, selectedGroupDeploymentIds]);
+
 
   const {
     data: deploymentData,
     isLoading: isCurrentLoading,
     isError: isCurrentError,
-  } = useGetDeploymentWisedataQuery(
-    { date: effectiveDate },
-    { skip: !effectiveDate }
-  );
+  } = useGetDeploymentWisedataQuery(currentQueryParams, {
+    skip: !effectiveDate,
+  });
 
   const {
     data: previousWeekData,
     isLoading: isPreviousLoading,
     isError: isPreviousError,
-  } = useGetDeploymentWisedataQuery(
-    { date: previousWeekDate },
-    { skip: !previousWeekDate }
-  );
+  } = useGetDeploymentWisedataQuery(previousQueryParams, {
+    skip: !previousWeekDate,
+  });
+
 
   const deployments = deploymentData?.data ?? [];
   const prevDeployments = previousWeekData?.data ?? [];
+
 
   const currentMap = useMemo(
     () => buildPreviousWeekMap(deployments),
@@ -65,18 +83,23 @@ const DeploymentAnalytics = () => {
     [prevDeployments]
   );
 
+
   const allDeploymentIds = useMemo(
     () => deployments.map((d) => d.deployment_id),
     [deployments]
   );
 
-  const effectiveDeploymentIds = useMemo(
-    () =>
-      selectedGroupDeploymentIds.length > 0
-        ? selectedGroupDeploymentIds
-        : allDeploymentIds,
-    [selectedGroupDeploymentIds, allDeploymentIds]
-  );
+  const effectiveDeploymentIds = useMemo(() => {
+    if (focusedDeploymentId) return [focusedDeploymentId];
+    if (selectedGroupDeploymentIds.length > 0)
+      return selectedGroupDeploymentIds;
+    return allDeploymentIds;
+  }, [
+    focusedDeploymentId,
+    selectedGroupDeploymentIds,
+    allDeploymentIds,
+  ]);
+
 
   const aggregatedDeployment = useMemo(() => {
     if (!effectiveDeploymentIds.length) return null;
@@ -88,11 +111,25 @@ const DeploymentAnalytics = () => {
     return aggregateByIds(effectiveDeploymentIds, prevMap);
   }, [effectiveDeploymentIds, prevMap]);
 
+  const displayContextLabel = useMemo(() => {
+    if (focusedDeploymentId) {
+      return `Showing data for Deployment: ${focusedDeploymentId}`;
+    }
+
+    if (selectedGroupDeploymentIds.length > 0) {
+      return `Showing data for Group (${selectedGroupDeploymentIds.length} deployments)`;
+    }
+
+    return "Showing data for All Deployments";
+  }, [focusedDeploymentId, selectedGroupDeploymentIds]);
+
+
   const isLoading = isCurrentLoading || isPreviousLoading;
   const isError = isCurrentError || isPreviousError;
 
   if (isLoading) return <SkeletonCard />;
   if (isError) return <div>Error: Something went wrong</div>;
+
 
   return (
     <SidebarInset>
@@ -101,8 +138,14 @@ const DeploymentAnalytics = () => {
         isDeploymentGroup={true}
         headerTitle="Dashboard Overview Per Deployment"
       />
+      
 
-      <div className="@container/main flex flex-col gap-4 pb-4">
+      <div className="@container/main flex flex-col gap-4 pt-4 pb-4">
+      
+        <div className="px-4 lg:px-6 text-sm text-muted-foreground">
+          {displayContextLabel}
+        </div>
+
         <SectionCards
           deploymentData={aggregatedDeployment}
           prevData={aggregatedPrevDeployment}
@@ -141,10 +184,9 @@ const DeploymentAnalytics = () => {
             columns={sheetColumns}
             loading={isLoading}
             onRowClick={(row) => {
-              dispatch(clearDeploymentIds());
-              setTimeout(() => {
-                dispatch(addDeploymentIds([row.deployment_id]));
-              }, 0);
+              setFocusedDeploymentId((prev) =>
+                prev === row.deployment_id ? null : row.deployment_id
+              );
             }}
           />
         </div>
